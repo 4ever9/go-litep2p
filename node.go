@@ -23,6 +23,10 @@ type Node struct {
 	peerAddrInfos []peer.AddrInfo
 }
 
+func (n *Node) Host() host.Host {
+	return n.host
+}
+
 func (n *Node) ID() peer.ID {
 	return n.host.ID()
 }

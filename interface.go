@@ -2,11 +2,15 @@ package litep2p
 
 import (
 	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
 )
 
 type Network interface {
 	PeerHandler
+
+	// Host
+	Host() host.Host
 
 	// Start it start the network service.
 	Start() error
