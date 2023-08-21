@@ -51,6 +51,8 @@ type PeerHandler interface {
 	// PeersNum get peers num connected
 	PeersNum() int
 
+	ConnectedPeerIds() []peer.ID
+
 	// IsConnected check if it has an open connection to peer
 	IsConnected(peer.ID) bool
 

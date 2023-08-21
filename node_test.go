@@ -67,35 +67,37 @@ func TestNode_Send(t *testing.T) {
 }
 
 func TestNode_Broadcast(t *testing.T) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	n1, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30010"))
-	require.Nil(t, err)
-	n2, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30011"), WithNewStreamHandler(func(s network.Stream) {
-		slog.Info("Node2 receive")
-		wg.Done()
-	}))
-	require.Nil(t, err)
+	for i := 0; i < 10; i++ {
+		var wg sync.WaitGroup
+		wg.Add(2)
+		n1, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30010"))
+		require.Nil(t, err)
+		n2, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30011"), WithNewStreamHandler(func(s network.Stream) {
+			slog.Info("Node2 receive")
+			wg.Done()
+		}))
+		require.Nil(t, err)
 
-	n3, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30012"), WithNewStreamHandler(func(s network.Stream) {
-		slog.Info("Node3 receive")
-		wg.Done()
-	}))
+		n3, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30012"), WithNewStreamHandler(func(s network.Stream) {
+			slog.Info("Node3 receive")
+			wg.Done()
+		}))
 
-	err = n2.Start()
-	require.Nil(t, err)
-	err = n3.Start()
-	require.Nil(t, err)
+		err = n2.Start()
+		require.Nil(t, err)
+		err = n3.Start()
+		require.Nil(t, err)
 
-	err = n1.Connect(n2.AddrInfo())
-	require.Nil(t, err)
-	err = n1.Connect(n3.AddrInfo())
-	require.Nil(t, err)
+		err = n1.Connect(n2.AddrInfo())
+		require.Nil(t, err)
+		err = n1.Connect(n3.AddrInfo())
+		require.Nil(t, err)
 
-	err = n1.Broadcast([]peer.ID{n2.ID(), n3.ID()}, []byte("hello"))
-	require.Nil(t, err)
+		err = n1.Broadcast([]peer.ID{n2.ID(), n3.ID()}, []byte("hello"))
+		require.Nil(t, err)
 
-	wg.Wait()
+		wg.Wait()
+	}
 }
 
 func loadSK(skStr string) crypto.PrivKey {
@@ -110,4 +112,35 @@ func loadSK(skStr string) crypto.PrivKey {
 	}
 
 	return sk
+}
+
+func TestNode_Broadcast2(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	n1, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30010"), WithNewStreamHandler(func(s network.Stream) {
+		slog.Info("Node1 receive")
+		wg.Done()
+	}))
+	require.Nil(t, err)
+	n2, err := New(WithLocalAddr("/ip4/127.0.0.1/tcp/30011"), WithNewStreamHandler(func(s network.Stream) {
+		slog.Info("Node2 receive")
+		wg.Done()
+	}))
+	require.Nil(t, err)
+
+	err = n1.Start()
+	err = n2.Start()
+	require.Nil(t, err)
+
+	err = n1.Connect(n2.AddrInfo())
+	require.Nil(t, err)
+	err = n2.Connect(n1.AddrInfo())
+	require.Nil(t, err)
+
+	err = n1.Broadcast([]peer.ID{n2.ID()}, []byte("hello"))
+	require.Nil(t, err)
+
+	err = n2.Broadcast([]peer.ID{n1.ID()}, []byte("hi"))
+
+	wg.Wait()
 }

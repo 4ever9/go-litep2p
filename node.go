@@ -52,6 +52,10 @@ func (n *Node) GetPeers() []peer.AddrInfo {
 	return n.peerAddrInfos
 }
 
+func (n *Node) ConnectedPeerIds() []peer.ID {
+	return n.host.Network().Peers()
+}
+
 func (n *Node) LocalAddr() string {
 	return n.config.localAddr
 }
