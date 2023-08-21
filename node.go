@@ -98,9 +98,12 @@ func (n *Node) AsyncSend(id peer.ID, data []byte) error {
 		return fmt.Errorf("new stream: %w", err)
 	}
 
-	_, err = s.Write(data)
+	writer := pbio.NewDelimitedWriter(s)
+	if err := writer.WriteMsg(&pb.Message{Data: data}); err != nil {
+		return fmt.Errorf("write msg: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 func (n *Node) Send(id peer.ID, data []byte) ([]byte, error) {
