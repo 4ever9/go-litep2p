@@ -39,7 +39,13 @@ func TestNode_AsyncSend(t *testing.T) {
 	err = n1.Connect(n2.AddrInfo())
 	require.Nil(t, err)
 
-	err = n1.AsyncSend(n2.ID(), []byte("222222"))
+	err = n1.AsyncSend(n2.ID(), []byte("m1"))
+	require.Nil(t, err)
+
+	err = n1.AsyncSend(n2.ID(), []byte("m2"))
+	require.Nil(t, err)
+
+	err = n1.AsyncSend(n2.ID(), []byte("m3"))
 	require.Nil(t, err)
 }
 
